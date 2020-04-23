@@ -39,6 +39,10 @@ MoonSizes %>% ggplot(aes(Distance_km, ApparentSize)) +
   ggsave("ApparentMoonSizes.jpeg")
 
 
+Distance1 <- qplot(MoonSizes$Distance_km) + labs(x = "Observed distances")
+
+Diameter1 <- qplot(MoonSizes$Diameter_km) + labs(x = "Observed diameters")
+
 qplot(MoonSizes$ApparentSize)
 
 MoonSizes %>% mutate(ApparentSize2 = Diameter_km/Distance_km) %>%
@@ -55,13 +59,18 @@ DiameterLambda = mean(MoonSizes$Diameter_km); print(DiameterLambda)
 
 DiameterSize = (DiameterLambda^2)/(var(MoonSizes$Diameter_km) - DiameterLambda)
 
-rnbinom(100000, size = DiameterSize, mu = DiameterLambda) %>% qplot
+Diameter2 <-
+  rnbinom(100000, size = DiameterSize, mu = DiameterLambda) %>% qplot + labs(x = "Predicted diameters")
 
 DistanceLambda = mean(MoonSizes$Distance_km); print(DistanceLambda)
 
 DistanceSize = (DistanceLambda^2)/(var(MoonSizes$Distance_km) - DistanceLambda)
 
-rnbinom(100000, size = DistanceSize, mu = DistanceLambda) %>% qplot
+Distance2 <- rnbinom(100000, size = DistanceSize, mu = DistanceLambda) %>%
+  qplot + labs(x = "Predicted distances")
+
+((Distance1 + Distance2)/(Diameter1 + Diameter2)) +
+  ggsave("Distributions.jpeg", width = 250, height = 200, units = "mm")
 
 NewMoons <- data.frame(
 
@@ -88,3 +97,9 @@ NewMoons$ApparentSize %>% between(27, 33) %>% table()
 NewMoons$ApparentSize %>% between(27, 33) %>% ggregplot::Prev()
 
 (Plot1|Plot2) + ggsave("PredictedSizes.jpeg", width = 250, height = 100, units = "mm")
+
+
+
+
+NewMoons$ApparentSize %>% between(27, 33) %>% ggregplot::Prev() %>%
+  magrittr::multiply_by(dnbinom(1, size = Size, mu = Lambda))
